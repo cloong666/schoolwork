@@ -1,4 +1,0 @@
-﻿  main.cpp
-C:\Users\lenovo\vcpkg\installed\x64-windows\include\SFML\Config.hpp(118,1): error C1189: #error:  "Enable C++17 or newer for your compiler (e.g. -std=c++17 for GCC/Clang or /std:c++17 for MSVC)"
-  (编译源文件“main.cpp”)
-  
