@@ -1,5 +1,5 @@
-// ºÏ²¢µÄĞ¡³µÓëĞ¡Çò·ÂÕæ³ÌĞò
-// Ğ¡³µÊ¹ÓÃ getimage/putimage ÒÆ¶¯£»Ğ¡Çò×ñÑ­ÎïÀí·´ÉäÓëËæ»ú»¯µÄ±ß½çĞĞÎª
+// åˆå¹¶çš„å°è½¦ä¸å°çƒä»¿çœŸç¨‹åº
+// å°è½¦ä½¿ç”¨ getimage/putimage ç§»åŠ¨ï¼›å°çƒéµå¾ªç‰©ç†åå°„ä¸éšæœºåŒ–çš„è¾¹ç•Œè¡Œä¸º
 
 #include <graphics.h>
 #include <conio.h>
@@ -8,143 +8,143 @@
 #include <time.h>
 #include <math.h>
 
-// ¶¨Òå PI ³£Á¿£¬±ÜÃâÒÀÀµ M_PI
+// å®šä¹‰ PI å¸¸é‡ï¼Œé¿å…ä¾èµ– M_PI
 static const double PI = 3.14159265358979323846;
 
-// ´¦Àí´°¿ÚÏûÏ¢µÄ¸¨Öúº¯Êı£ºÈç¹û½ÓÊÕµ½ WM_QUIT/WM_CLOSE ·µ»Ø false
+// å¤„ç†çª—å£æ¶ˆæ¯çš„è¾…åŠ©å‡½æ•°ï¼šå¦‚æœæ¥æ”¶åˆ° WM_QUIT/WM_CLOSE è¿”å› false
 static bool ProcessWindowMessages()
 {
     MSG msg;
-    // Ñ­»·´¦ÀíÏûÏ¢¶ÓÁĞ
+    // å¾ªç¯å¤„ç†æ¶ˆæ¯é˜Ÿåˆ—
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
     {
-        // Èç¹ûÊÕµ½ÍË³öÏûÏ¢£¬Ôò·µ»Ø false
+        // å¦‚æœæ”¶åˆ°é€€å‡ºæ¶ˆæ¯ï¼Œåˆ™è¿”å› false
         if (msg.message == WM_QUIT || msg.message == WM_CLOSE)
             return false;
-        // ×ª»»²¢·Ö·¢ÏûÏ¢
+        // è½¬æ¢å¹¶åˆ†å‘æ¶ˆæ¯
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    return true; // Õı³£
+    return true; // æ­£å¸¸
 }
 
-// Éú³ÉËæ»úÕı¸º·ûºÅ£¨·µ»Ø 1 »ò -1£©
+// ç”Ÿæˆéšæœºæ­£è´Ÿç¬¦å·ï¼ˆè¿”å› 1 æˆ– -1ï¼‰
 static int randSign()
 {
     return (rand() % 2) ? 1 : -1;
 }
 
-// ÔÚ±ÕÇø¼ä [minv, maxv] ·µ»ØËæ»úÕûÊıËÙ¶È
+// åœ¨é—­åŒºé—´ [minv, maxv] è¿”å›éšæœºæ•´æ•°é€Ÿåº¦
 static int randVel(int minv, int maxv)
 {
     return minv + rand() % (maxv - minv + 1);
 }
 
-// Ğ¡Çò½á¹¹Ìå£º°üº¬Î»ÖÃ¡¢ËÙ¶È¡¢°ë¾¶¡¢ÖÊÁ¿ºÍÑÕÉ«
+// å°çƒç»“æ„ä½“ï¼šåŒ…å«ä½ç½®ã€é€Ÿåº¦ã€åŠå¾„ã€è´¨é‡å’Œé¢œè‰²
 struct Ball
 {
-    double x, y;    // ÖĞĞÄÎ»ÖÃ
-    double vx, vy;  // ËÙ¶È
-    double r;       // °ë¾¶
-    double m;       // ÖÊÁ¿
-    COLORREF color; // ÑÕÉ«
+    double x, y;    // ä¸­å¿ƒä½ç½®
+    double vx, vy;  // é€Ÿåº¦
+    double r;       // åŠå¾„
+    double m;       // è´¨é‡
+    COLORREF color; // é¢œè‰²
 };
 
 int main()
 {
-    // ´°¿Ú¿í¸ßÉèÖÃ
+    // çª—å£å®½é«˜è®¾ç½®
     const int width = 800;
     const int height = 600;
 
-    // ÓÃÊ±¼ä×÷ÎªËæ»úÖÖ×Ó
+    // ç”¨æ—¶é—´ä½œä¸ºéšæœºç§å­
     srand((unsigned)time(NULL));
 
-    // ³õÊ¼»¯ EasyX Í¼ĞÎ´°¿Ú
+    // åˆå§‹åŒ– EasyX å›¾å½¢çª—å£
     initgraph(width, height);
-    // ÉèÖÃ±³¾°É«Îª°×É«²¢ÇåÆÁ
+    // è®¾ç½®èƒŒæ™¯è‰²ä¸ºç™½è‰²å¹¶æ¸…å±
     setbkcolor(WHITE);
     cleardevice();
 
-    // ×¼±¸Ğ¡³µÍ¼ÏñµÄ³ß´ç£¨ÓÃÓÚ getimage/putimage£©
+    // å‡†å¤‡å°è½¦å›¾åƒçš„å°ºå¯¸ï¼ˆç”¨äº getimage/putimageï¼‰
     const int carW = 200;
     const int carH = 140;
-    IMAGE carImg; // ´æ·ÅĞ¡³µÎ»Í¼µÄ¶ÔÏó
+    IMAGE carImg; // å­˜æ”¾å°è½¦ä½å›¾çš„å¯¹è±¡
 
-    // ÔÚÆÁÄ»Ô­µã»æÖÆĞ¡³µ£¬È»ºóÓÃ getimage ²¶»ñÎªÍ¼Ïñ
+    // åœ¨å±å¹•åŸç‚¹ç»˜åˆ¶å°è½¦ï¼Œç„¶åç”¨ getimage æ•è·ä¸ºå›¾åƒ
     cleardevice();
 
-    // ÉèÖÃ³µÉíÌî³äÑÕÉ«²¢»æÖÆ³µÉí¾ØĞÎ£¨ÊµĞÄ£©
+    // è®¾ç½®è½¦èº«å¡«å……é¢œè‰²å¹¶ç»˜åˆ¶è½¦èº«çŸ©å½¢ï¼ˆå®å¿ƒï¼‰
     setfillcolor(RGB(200, 0, 0));
     setcolor(RGB(200, 0, 0));
-    // ³µÉíÖ÷¾ØĞÎ£¨×óÉÏ x=10,y=30 ÓÒÏÂ x=190,y=80£©
+    // è½¦èº«ä¸»çŸ©å½¢ï¼ˆå·¦ä¸Š x=10,y=30 å³ä¸‹ x=190,y=80ï¼‰
     solidrectangle(10, 30, 190, 80);
 
-    // »æÖÆ³µ¶¥¶à±ßĞÎ£¨¸üÏñ³µ¶¥ĞÎ×´£©
+    // ç»˜åˆ¶è½¦é¡¶å¤šè¾¹å½¢ï¼ˆæ›´åƒè½¦é¡¶å½¢çŠ¶ï¼‰
     POINT roof[4] = { {50,30}, {90,18}, {140,18}, {160,30} };
     setfillcolor(RGB(180,0,0));
     setcolor(RGB(180,0,0));
     fillpolygon(roof, 4);
 
-    // »æÖÆ³µ´°£¨Ìî³äÎªÀ¶É«£©
-    setfillcolor(RGB(135,206,235)); // Ìì¿ÕÀ¶
+    // ç»˜åˆ¶è½¦çª—ï¼ˆå¡«å……ä¸ºè“è‰²ï¼‰
+    setfillcolor(RGB(135,206,235)); // å¤©ç©ºè“
     setcolor(RGB(135,206,235));
     fillrectangle(95, 35, 140, 65);
 
-    // »­³ö³µÉíÂÖÀªÓëÏ¸½Ú£¨ºÚÉ«£©
+    // ç”»å‡ºè½¦èº«è½®å»“ä¸ç»†èŠ‚ï¼ˆé»‘è‰²ï¼‰
     setcolor(BLACK);
-    rectangle(10, 30, 190, 80); // ³µÉíÂÖÀª
-    line(50, 30, 90, 18);       // ³µ¶¥Ïß
-    line(90, 18, 140, 18);     // ³µ¶¥Ïß
-    line(140, 18, 160, 30);    // ³µ¶¥Ïß
+    rectangle(10, 30, 190, 80); // è½¦èº«è½®å»“
+    line(50, 30, 90, 18);       // è½¦é¡¶çº¿
+    line(90, 18, 140, 18);     // è½¦é¡¶çº¿
+    line(140, 18, 160, 30);    // è½¦é¡¶çº¿
 
-    // ³µµÆ£¨Ìî³ä»ÆÉ«£©
+    // è½¦ç¯ï¼ˆå¡«å……é»„è‰²ï¼‰
     setfillcolor(YELLOW);
     setcolor(YELLOW);
     fillcircle(185, 60, 8);
 
-    // ÅÅÆø¿Ú£¨ºÚÉ«Ğ¡¾ØĞÎ£©
+    // æ’æ°”å£ï¼ˆé»‘è‰²å°çŸ©å½¢ï¼‰
     setfillcolor(BLACK);
     setcolor(BLACK);
     solidrectangle(2, 70, 8, 74);
 
-    // ÂÖÌ¥»æÖÆ£ºµ÷ÕûÂÖÌ¥ÖĞĞÄÎ»ÖÃÓë°ë¾¶ÒÔ¼õÉÙÂÖÌ¥Óë³µÉíÖ®¼äµÄ·ìÏ¶
-    // ½«ÂÖÌ¥ÖĞĞÄÉÏÒÆµ½ y=88£¬°ë¾¶ÉèÎª 16£¬Ê¹ÂÖÌ¥Óë³µÉí¸üÌùºÏ
+    // è½®èƒç»˜åˆ¶ï¼šè°ƒæ•´è½®èƒä¸­å¿ƒä½ç½®ä¸åŠå¾„ä»¥å‡å°‘è½®èƒä¸è½¦èº«ä¹‹é—´çš„ç¼éš™
+    // å°†è½®èƒä¸­å¿ƒä¸Šç§»åˆ° y=88ï¼ŒåŠå¾„è®¾ä¸º 16ï¼Œä½¿è½®èƒä¸è½¦èº«æ›´è´´åˆ
     setfillcolor(DARKGRAY);
     setcolor(DARKGRAY);
-    // ×óÂÖÖĞĞÄ (50,88)£¬ÓÒÂÖÖĞĞÄ (140,88)£¬°ë¾¶ 16
+    // å·¦è½®ä¸­å¿ƒ (50,88)ï¼Œå³è½®ä¸­å¿ƒ (140,88)ï¼ŒåŠå¾„ 16
     fillcircle(50, 88, 16);
     fillcircle(140, 88, 16);
-    // ³µÂÖÄÚÈ¦£¨ÂÖì±£©Ê¹ÓÃ½ÏĞ¡µÄºÚÉ«Ô²ĞÎ
+    // è½¦è½®å†…åœˆï¼ˆè½®æ¯‚ï¼‰ä½¿ç”¨è¾ƒå°çš„é»‘è‰²åœ†å½¢
     setfillcolor(BLACK);
     setcolor(BLACK);
     fillcircle(50, 88, 6);
     fillcircle(140, 88, 6);
 
-    // ³µÁ¾µ×²¿µÄÏ¸½ÚÏß£¨µØÃæ²Î¿¼Ïß£©
+    // è½¦è¾†åº•éƒ¨çš„ç»†èŠ‚çº¿ï¼ˆåœ°é¢å‚è€ƒçº¿ï¼‰
     setcolor(BLACK);
     line(0, 110, 200, 110);
 
-    // ²¶»ñĞ¡³µÎ»Í¼µ½ carImg ¶ÔÏóÖĞ£¨¸´ÖÆ 0,0 µ½ carW,carH ÇøÓò£©
+    // æ•è·å°è½¦ä½å›¾åˆ° carImg å¯¹è±¡ä¸­ï¼ˆå¤åˆ¶ 0,0 åˆ° carW,carH åŒºåŸŸï¼‰
     getimage(&carImg, 0, 0, carW, carH);
 
-    // ÇåÆÁ×¼±¸Ö÷Ñ­»·
+    // æ¸…å±å‡†å¤‡ä¸»å¾ªç¯
     cleardevice();
 
-    // ¿ªÆôÅúÁ¿»æÖÆ£¨¼õÉÙÉÁË¸£©
+    // å¼€å¯æ‰¹é‡ç»˜åˆ¶ï¼ˆå‡å°‘é—ªçƒï¼‰
     BeginBatchDraw();
 
-    // Éè¶¨µØÃæ y ×ø±ê£¬²¢Ê¹Ğ¡³µÔÚµØÃæÉÏĞĞÊ»£¨³µµ×ÌùµØ£©
-    const int groundY = 500;             // µØÃæÔÚ´°¿ÚÖĞµÄ y ×ø±ê
-    int carX = 50;                       // Ğ¡³µµ±Ç° x ×ø±ê
-    const int carY = groundY - carH;     // Ê¹Ğ¡³µµ×²¿ÓëµØÃæ¶ÔÆë
-    int carDir = 1;                      // Ğ¡³µ·½Ïò£º1 ÏòÓÒ£¬-1 Ïò×ó
-    const int carSpeed = 4;              // Ğ¡³µÃ¿Ö¡Î»ÒÆ
+    // è®¾å®šåœ°é¢ y åæ ‡ï¼Œå¹¶ä½¿å°è½¦åœ¨åœ°é¢ä¸Šè¡Œé©¶ï¼ˆè½¦åº•è´´åœ°ï¼‰
+    const int groundY = 500;             // åœ°é¢åœ¨çª—å£ä¸­çš„ y åæ ‡
+    int carX = 50;                       // å°è½¦å½“å‰ x åæ ‡
+    const int carY = groundY - carH;     // ä½¿å°è½¦åº•éƒ¨ä¸åœ°é¢å¯¹é½
+    int carDir = 1;                      // å°è½¦æ–¹å‘ï¼š1 å‘å³ï¼Œ-1 å‘å·¦
+    const int carSpeed = 4;              // å°è½¦æ¯å¸§ä½ç§»
 
-    // Ğ¡Çò²ÎÊı£º°ë¾¶Óë¶àÇòÊı×é
-    const int r = 20;                    // Ğ¡Çò°ë¾¶£¨Í³Ò»£©
-    const int NUM_BALLS = 5;             // Ğ¡ÇòÊıÁ¿
-    Ball balls[5];                       // Ğ¡ÇòÊı×é
-    // ³õÊ¼Î»ÖÃ£¨·ÖÉ¢ÅÅÁĞ£¬±ÜÃâ³õÊ¼ÖØµş£©
+    // å°çƒå‚æ•°ï¼šåŠå¾„ä¸å¤šçƒæ•°ç»„
+    const int r = 20;                    // å°çƒåŠå¾„ï¼ˆç»Ÿä¸€ï¼‰
+    const int NUM_BALLS = 5;             // å°çƒæ•°é‡
+    Ball balls[5];                       // å°çƒæ•°ç»„
+    // åˆå§‹ä½ç½®ï¼ˆåˆ†æ•£æ’åˆ—ï¼Œé¿å…åˆå§‹é‡å ï¼‰
     const double initX[5] = { 150.0, 400.0, 650.0, 200.0, 600.0 };
     const double initY[5] = { 150.0, 300.0, 150.0, 400.0, 350.0 };
     const COLORREF ballColors[5] = { LIGHTRED, LIGHTBLUE, LIGHTGREEN, YELLOW, MAGENTA };
@@ -155,38 +155,38 @@ int main()
         balls[i].r = r;
         balls[i].m = 1.0;
         balls[i].color = ballColors[i];
-        // Ëæ»ú³õËÙ¶È£º·½ÏòËæ»ú£¬´óĞ¡ÔÚ [2, 5]
+        // éšæœºåˆé€Ÿåº¦ï¼šæ–¹å‘éšæœºï¼Œå¤§å°åœ¨ [2, 5]
         double ang = (rand() % 360) * PI / 180.0;
         double spd = (double)randVel(2, 5);
         balls[i].vx = spd * cos(ang);
         balls[i].vy = spd * sin(ang);
     }
 
-    // Ö÷Ñ­»·ÔËĞĞ±êÖ¾
+    // ä¸»å¾ªç¯è¿è¡Œæ ‡å¿—
     bool running = true;
 
-    // Ö÷Ñ­»·£º´¦ÀíÊäÈë¡¢¸üĞÂÎïÀí¡¢»æÖÆÖ¡
+    // ä¸»å¾ªç¯ï¼šå¤„ç†è¾“å…¥ã€æ›´æ–°ç‰©ç†ã€ç»˜åˆ¶å¸§
     while (running && !_kbhit())
     {
-        // ´¦Àí´°¿ÚÏûÏ¢£¬Èô´°¿Ú¹Ø±ÕÔòÍË³ö
+        // å¤„ç†çª—å£æ¶ˆæ¯ï¼Œè‹¥çª—å£å…³é—­åˆ™é€€å‡º
         running = ProcessWindowMessages();
         if (!running) break;
 
-        // ¸üĞÂĞ¡³µÎ»ÖÃ£º¸ù¾İ·½ÏòÓëËÙ¶ÈÒÆ¶¯
+        // æ›´æ–°å°è½¦ä½ç½®ï¼šæ ¹æ®æ–¹å‘ä¸é€Ÿåº¦ç§»åŠ¨
         carX += carDir * carSpeed;
-        // µ½´ï×ó±ß½çÔò·´Ïò²¢ĞŞÕıÎ»ÖÃ
+        // åˆ°è¾¾å·¦è¾¹ç•Œåˆ™åå‘å¹¶ä¿®æ­£ä½ç½®
         if (carX <= 0) { carX = 0; carDir = 1; }
-        // µ½´ïÓÒ±ß½çÔò·´Ïò²¢ĞŞÕıÎ»ÖÃ
+        // åˆ°è¾¾å³è¾¹ç•Œåˆ™åå‘å¹¶ä¿®æ­£ä½ç½®
         if (carX + carW >= width) { carX = width - carW; carDir = -1; }
 
-        // ¸üĞÂ¸÷Ğ¡ÇòÎ»ÖÃ²¢´¦Àí±ß½çÓëĞ¡³µÅö×²
+        // æ›´æ–°å„å°çƒä½ç½®å¹¶å¤„ç†è¾¹ç•Œä¸å°è½¦ç¢°æ’
         for (int i = 0; i < NUM_BALLS; i++)
         {
-            // ¸üĞÂÎ»ÖÃ
+            // æ›´æ–°ä½ç½®
             balls[i].x += balls[i].vx;
             balls[i].y += balls[i].vy;
 
-            // ±ß½çµ¯ĞÔÅö×²£¨»Ö¸´ÏµÊı e=1£©£º·´ÉäËÙ¶È²¢ĞŞÕıÎ»ÖÃ
+            // è¾¹ç•Œå¼¹æ€§ç¢°æ’ï¼ˆæ¢å¤ç³»æ•° e=1ï¼‰ï¼šåå°„é€Ÿåº¦å¹¶ä¿®æ­£ä½ç½®
             if (balls[i].x - r <= 0)
             {
                 balls[i].x = r;
@@ -208,52 +208,136 @@ int main()
                 balls[i].vy = -fabs(balls[i].vy);
             }
 
-            // Åö×²¼ì²â£ºĞ¡ÇòÓëĞ¡³µ¾ØĞÎÅö×²µÄ×î½üµã¾àÀë·¨
-            // ÎªÁËÈÃÅö×²Ïä¾¡Á¿ÌùºÏĞ¡³µÍ¼Ïñ£¬ÕâÀïÊ¹ÓÃ±È carW/carH ¸ü½ô´ÕµÄ¾ØĞÎ
-            int carLeft   = carX + 10;   // Ğ¡³µ¾ØĞÎ×ó±ß½ç
-            int carTop    = carY + 18;   // Ğ¡³µ¾ØĞÎÉÏ±ß½ç
-            int carRight  = carX + 190;  // Ğ¡³µ¾ØĞÎÓÒ±ß½ç
-            int carBottom = carY + 104;  // Ğ¡³µ¾ØĞÎÏÂ±ß½ç
+            // ç¢°æ’æ£€æµ‹ï¼šå°†å°è½¦æ‹†åˆ†ä¸ºå¤šä¸ªåŸºç¡€ç¢°æ’ä½“ï¼ˆè½¦èº«/è½¦é¡¶/è½®èƒï¼‰
+            // ä»è€Œæ¯”å•ä¸€å¤§çŸ©å½¢æ›´è´´åˆå›¾åƒå¤–å½¢
+            bool hitCar = false;
+            double hitNx = 0.0, hitNy = -1.0;
+            double bestPenetration = 0.0;
 
-            // ¼ÆËãĞ¡ÇòÖĞĞÄµ½¾ØĞÎµÄ×î½üµã×ø±ê
-            double nearestX = balls[i].x;
-            if (nearestX < carLeft)  nearestX = carLeft;
-            if (nearestX > carRight) nearestX = carRight;
-            double nearestY = balls[i].y;
-            if (nearestY < carTop)    nearestY = carTop;
-            if (nearestY > carBottom) nearestY = carBottom;
-
-            // ×î½üµãÏòÁ¿ cnx, cny£¨´Ó¾ØĞÎµ½Ğ¡ÇòÖĞĞÄ£©
-            double cnx = balls[i].x - nearestX;
-            double cny = balls[i].y - nearestY;
-            double dist2 = cnx * cnx + cny * cny; // ×î½üµãµ½ÖĞĞÄµÄÆ½·½¾àÀë
-
-            // Èç¹û¾àÀëĞ¡ÓÚµÈÓÚ°ë¾¶Æ½·½£¬ËµÃ÷·¢ÉúÁËÅö×²»ò½Ó´¥
-            if (dist2 <= (double)(r * r))
+            auto considerHit = [&](double nx, double ny, double penetration)
             {
-                // ¼ÆËãÅö×²·¨Ïß£¨´Ó¾ØĞÎ±íÃæÖ¸ÏòĞ¡Çò£©
-                double len = sqrt(dist2);
-                double nnx, nny; // µ¥Î»·¨Ïß
-                if (len < 0.0001)
+                if (penetration <= 0.0) return;
+                if (!hitCar || penetration > bestPenetration)
                 {
-                    nnx = 0.0; nny = -1.0;
+                    hitCar = true;
+                    bestPenetration = penetration;
+                    hitNx = nx;
+                    hitNy = ny;
+                }
+            };
+
+            auto testRect = [&](double left, double top, double right, double bottom)
+            {
+                double nearestX = balls[i].x;
+                if (nearestX < left)  nearestX = left;
+                if (nearestX > right) nearestX = right;
+
+                double nearestY = balls[i].y;
+                if (nearestY < top)    nearestY = top;
+                if (nearestY > bottom) nearestY = bottom;
+
+                double dx = balls[i].x - nearestX;
+                double dy = balls[i].y - nearestY;
+                double dist2 = dx * dx + dy * dy;
+                if (dist2 > (double)(r * r)) return;
+
+                if (dist2 < 1e-12)
+                {
+                    // çƒå¿ƒåœ¨çŸ©å½¢å†…éƒ¨æˆ–æè¿‘è¾¹ç•Œæ—¶ï¼ŒæŒ‰æœ€è¿‘è¾¹ç»™æ³•çº¿
+                    double dl = balls[i].x - left;
+                    double dr = right - balls[i].x;
+                    double dt = balls[i].y - top;
+                    double db = bottom - balls[i].y;
+
+                    double minInside = dl;
+                    double nx = -1.0, ny = 0.0;
+
+                    if (dr < minInside) { minInside = dr; nx = 1.0; ny = 0.0; }
+                    if (dt < minInside) { minInside = dt; nx = 0.0; ny = -1.0; }
+                    if (db < minInside) { minInside = db; nx = 0.0; ny = 1.0; }
+
+                    considerHit(nx, ny, r + minInside);
                 }
                 else
                 {
-                    nnx = cnx / len;
-                    nny = cny / len;
+                    double dist = sqrt(dist2);
+                    considerHit(dx / dist, dy / dist, r - dist);
                 }
+            };
 
-                // ±£´æÅö×²Ç°Ğ¡ÇòËÙ¶È´óĞ¡
+            auto testCircle = [&](double cx, double cy, double cr)
+            {
+                double dx = balls[i].x - cx;
+                double dy = balls[i].y - cy;
+                double dist2 = dx * dx + dy * dy;
+                double minDist = r + cr;
+                double minDist2 = minDist * minDist;
+                if (dist2 > minDist2) return;
+
+                if (dist2 < 1e-12)
+                {
+                    considerHit(0.0, -1.0, minDist);
+                }
+                else
+                {
+                    double dist = sqrt(dist2);
+                    considerHit(dx / dist, dy / dist, minDist - dist);
+                }
+            };
+
+            auto testSegment = [&](double x1, double y1, double x2, double y2)
+            {
+                double sx = x2 - x1;
+                double sy = y2 - y1;
+                double segLen2 = sx * sx + sy * sy;
+                if (segLen2 < 1e-12) return;
+
+                double bx = balls[i].x - x1;
+                double by = balls[i].y - y1;
+                double t = (bx * sx + by * sy) / segLen2;
+                if (t < 0.0) t = 0.0;
+                if (t > 1.0) t = 1.0;
+
+                double px = x1 + t * sx;
+                double py = y1 + t * sy;
+                double dx = balls[i].x - px;
+                double dy = balls[i].y - py;
+                double dist2 = dx * dx + dy * dy;
+                if (dist2 > (double)(r * r)) return;
+
+                if (dist2 < 1e-12)
+                {
+                    considerHit(0.0, -1.0, (double)r);
+                }
+                else
+                {
+                    double dist = sqrt(dist2);
+                    considerHit(dx / dist, dy / dist, (double)r - dist);
+                }
+            };
+
+            // è½¦èº«ä¸»çŸ©å½¢
+            testRect(carX + 10, carY + 30, carX + 190, carY + 80);
+            // è½¦é¡¶ä½¿ç”¨çº¿æ®µç¢°æ’ï¼ˆæ›´è´´åˆæ–œè¾¹ï¼‰
+            testSegment(carX + 50,  carY + 30, carX + 90,  carY + 18);
+            testSegment(carX + 90,  carY + 18, carX + 140, carY + 18);
+            testSegment(carX + 140, carY + 18, carX + 160, carY + 30);
+            // è½®èƒåœ†å½¢ç¢°æ’ä½“
+            testCircle(carX + 50,  carY + 88, 16.0);
+            testCircle(carX + 140, carY + 88, 16.0);
+
+            if (hitCar)
+            {
+                // ä¿å­˜ç¢°æ’å‰å°çƒé€Ÿåº¦å¤§å°
                 double speedBefore = sqrt(balls[i].vx * balls[i].vx + balls[i].vy * balls[i].vy);
                 if (speedBefore < 0.001) speedBefore = 0.001;
 
-                // ¶ÔĞ¡ÇòËÙ¶È½øĞĞ·´Éä£ºv' = v - 2*(v.n)*n
-                double dot = balls[i].vx * nnx + balls[i].vy * nny;
-                double rvx = balls[i].vx - 2.0 * dot * nnx;
-                double rvy = balls[i].vy - 2.0 * dot * nny;
+                // å¯¹å°çƒé€Ÿåº¦è¿›è¡Œåå°„ï¼šv' = v - 2*(v.n)*n
+                double dot = balls[i].vx * hitNx + balls[i].vy * hitNy;
+                double rvx = balls[i].vx - 2.0 * dot * hitNx;
+                double rvy = balls[i].vy - 2.0 * dot * hitNy;
 
-                // ½«·´ÉäÏòÁ¿¹éÒ»»¯ºó°´Ô­ËÙ¶È´óĞ¡»Ö¸´
+                // å°†åå°„å‘é‡å½’ä¸€åŒ–åæŒ‰åŸé€Ÿåº¦å¤§å°æ¢å¤
                 double rvSpeed = sqrt(rvx * rvx + rvy * rvy);
                 if (rvSpeed < 0.0001)
                 {
@@ -267,14 +351,14 @@ int main()
                     balls[i].vy = rvy * (speedBefore / rvSpeed);
                 }
 
-                // ½«Ğ¡ÇòÑØ·¨ÏßÍÆ³ö±íÃæÒÔÒÆ³ı´©Í¸
-                balls[i].x = nearestX + nnx * (r + 0.5);
-                balls[i].y = nearestY + nny * (r + 0.5);
+                // å°†å°çƒæ²¿æ³•çº¿æ¨å‡ºå°è½¦è¡¨é¢ä»¥ç§»é™¤ç©¿é€
+                balls[i].x += hitNx * (bestPenetration + 0.5);
+                balls[i].y += hitNy * (bestPenetration + 0.5);
             }
         }
 
-        // Ğ¡Çò¼äÍêÈ«µ¯ĞÔÅö×²£¨¶¯Á¿ÊØºã + ¶¯ÄÜÊØºã£¬»Ö¸´ÏµÊı e=1£©
-        // Ê¹ÓÃ³åÁ¿·¨£ºÑØÅö×²·¨ÏòÁ¿·Ö½âËÙ¶È£¬½»»»·¨Ïò·ÖÁ¿
+        // å°çƒé—´å®Œå…¨å¼¹æ€§ç¢°æ’ï¼ˆåŠ¨é‡å®ˆæ’ + åŠ¨èƒ½å®ˆæ’ï¼Œæ¢å¤ç³»æ•° e=1ï¼‰
+        // ä½¿ç”¨å†²é‡æ³•ï¼šæ²¿ç¢°æ’æ³•å‘é‡åˆ†è§£é€Ÿåº¦ï¼Œäº¤æ¢æ³•å‘åˆ†é‡
         for (int i = 0; i < NUM_BALLS; i++)
         {
             for (int j = i + 1; j < NUM_BALLS; j++)
@@ -282,25 +366,25 @@ int main()
                 double dx = balls[j].x - balls[i].x;
                 double dy = balls[j].y - balls[i].y;
                 double dist2 = dx * dx + dy * dy;
-                double minDist = 2.0 * r; // Á½Çò°ë¾¶Ö®ºÍ
+                double minDist = 2.0 * r; // ä¸¤çƒåŠå¾„ä¹‹å’Œ
 
                 if (dist2 >= minDist * minDist || dist2 < 1e-12)
-                    continue; // Î´½Ó´¥»òÖØºÏÔòÌø¹ı
+                    continue; // æœªæ¥è§¦æˆ–é‡åˆåˆ™è·³è¿‡
 
                 double dist = sqrt(dist2);
-                // µ¥Î»·¨ÏòÁ¿£¨´ÓÇò i Ö¸ÏòÇò j£©
+                // å•ä½æ³•å‘é‡ï¼ˆä»çƒ i æŒ‡å‘çƒ jï¼‰
                 double nx = dx / dist;
                 double ny = dy / dist;
 
-                // Ïà¶ÔËÙ¶ÈÑØ·¨Ïò·ÖÁ¿£¨ÕıÖµ±íÊ¾Á½ÇòÏàÏò¿¿½ü£©
+                // ç›¸å¯¹é€Ÿåº¦æ²¿æ³•å‘åˆ†é‡ï¼ˆæ­£å€¼è¡¨ç¤ºä¸¤çƒç›¸å‘é è¿‘ï¼‰
                 double rel = (balls[i].vx - balls[j].vx) * nx
                            + (balls[i].vy - balls[j].vy) * ny;
 
-                if (rel > 0.0) // ½ö´¦Àí¿¿½üÇéĞÎ£¬±ÜÃâ·ÖÀëÊ±ÖØ¸´Åö×²
+                if (rel > 0.0) // ä»…å¤„ç†é è¿‘æƒ…å½¢ï¼Œé¿å…åˆ†ç¦»æ—¶é‡å¤ç¢°æ’
                 {
                     double mi = balls[i].m;
                     double mj = balls[j].m;
-                    // ÍêÈ«µ¯ĞÔ³åÁ¿´óĞ¡£¨e=1£©£º imp = 2*rel / (1/mi + 1/mj)
+                    // å®Œå…¨å¼¹æ€§å†²é‡å¤§å°ï¼ˆe=1ï¼‰ï¼š imp = 2*rel / (1/mi + 1/mj)
                     double imp = 2.0 * rel / (1.0 / mi + 1.0 / mj);
                     balls[i].vx -= (imp / mi) * nx;
                     balls[i].vy -= (imp / mi) * ny;
@@ -308,7 +392,7 @@ int main()
                     balls[j].vy += (imp / mj) * ny;
                 }
 
-                // Î»ÖÃĞŞÕı£º½«ÖØµşµÄÁ½Çò¾ùÔÈ·Ö¿ª£¬·ÀÖ¹¶¶¶¯
+                // ä½ç½®ä¿®æ­£ï¼šå°†é‡å çš„ä¸¤çƒå‡åŒ€åˆ†å¼€ï¼Œé˜²æ­¢æŠ–åŠ¨
                 double overlap = minDist - dist;
                 if (overlap > 0.0)
                 {
@@ -321,17 +405,17 @@ int main()
             }
         }
 
-        // »æÖÆÖ¡£ºÏÈÇåÆÁ
+        // ç»˜åˆ¶å¸§ï¼šå…ˆæ¸…å±
         cleardevice();
 
-        // »æÖÆµØÃæ²Î¿¼Ïß£¨Ê¹ÓÃ groundY£©
+        // ç»˜åˆ¶åœ°é¢å‚è€ƒçº¿ï¼ˆä½¿ç”¨ groundYï¼‰
         setcolor(BLACK);
         line(0, groundY, width, groundY);
 
-        // Ê¹ÓÃ putimage »æÖÆĞ¡³µÍ¼Ïñµ½µ±Ç° carX, carY£¨±£Ö¤³µµ×ÌùµØ£©
+        // ä½¿ç”¨ putimage ç»˜åˆ¶å°è½¦å›¾åƒåˆ°å½“å‰ carX, carYï¼ˆä¿è¯è½¦åº•è´´åœ°ï¼‰
         putimage(carX, carY, &carImg);
 
-        // »æÖÆËùÓĞĞ¡Çò
+        // ç»˜åˆ¶æ‰€æœ‰å°çƒ
         for (int i = 0; i < NUM_BALLS; i++)
         {
             setfillcolor(balls[i].color);
@@ -339,14 +423,14 @@ int main()
             fillcircle((int)balls[i].x, (int)balls[i].y, r);
         }
 
-        // Ë¢ĞÂÅúÁ¿»æÖÆµÄÄÚÈİµ½ÆÁÄ»
+        // åˆ·æ–°æ‰¹é‡ç»˜åˆ¶çš„å†…å®¹åˆ°å±å¹•
         FlushBatchDraw();
 
-        // ¿ØÖÆÖ¡ÂÊ£¨Ë¯Ãß 30 ºÁÃë£©
+        // æ§åˆ¶å¸§ç‡ï¼ˆç¡çœ  30 æ¯«ç§’ï¼‰
         Sleep(30);
     }
 
-    // ½áÊøÅúÁ¿»æÖÆ²¢¹Ø±ÕÍ¼ĞÎ´°¿Ú
+    // ç»“æŸæ‰¹é‡ç»˜åˆ¶å¹¶å…³é—­å›¾å½¢çª—å£
     EndBatchDraw();
     closegraph();
     return 0;
