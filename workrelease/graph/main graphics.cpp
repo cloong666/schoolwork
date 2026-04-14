@@ -40,6 +40,16 @@ static int randVel(int minv, int maxv)
     return minv + rand() % (maxv - minv + 1);
 }
 
+// 小球结构体：包含位置、速度、半径、质量和颜色
+struct Ball
+{
+    double x, y;    // 中心位置
+    double vx, vy;  // 速度
+    double r;       // 半径
+    double m;       // 质量
+    COLORREF color; // 颜色
+};
+
 int main()
 {
     // 窗口宽高设置
@@ -130,11 +140,27 @@ int main()
     int carDir = 1;                      // 小车方向：1 向右，-1 向左
     const int carSpeed = 4;              // 小车每帧位移
 
-    // 小球参数：半径、初始位置、初始速度（随机方向与大小）
-    const int r = 20;                    // 小球半径
-    double bx = 400.0, by = 200.0;       // 小球初始中心位置
-    double bvx = randVel(2, 5) * randSign(); // 随机水平速度
-    double bvy = randVel(2, 5) * randSign(); // 随机垂直速度
+    // 小球参数：半径与多球数组
+    const int r = 20;                    // 小球半径（统一）
+    const int NUM_BALLS = 5;             // 小球数量
+    Ball balls[5];                       // 小球数组
+    // 初始位置（分散排列，避免初始重叠）
+    const double initX[5] = { 150.0, 400.0, 650.0, 200.0, 600.0 };
+    const double initY[5] = { 150.0, 300.0, 150.0, 400.0, 350.0 };
+    const COLORREF ballColors[5] = { LIGHTRED, LIGHTBLUE, LIGHTGREEN, YELLOW, MAGENTA };
+    for (int i = 0; i < NUM_BALLS; i++)
+    {
+        balls[i].x = initX[i];
+        balls[i].y = initY[i];
+        balls[i].r = r;
+        balls[i].m = 1.0;
+        balls[i].color = ballColors[i];
+        // 随机初速度：方向随机，大小在 [2, 5]
+        double ang = (rand() % 360) * PI / 180.0;
+        double spd = (double)randVel(2, 5);
+        balls[i].vx = spd * cos(ang);
+        balls[i].vy = spd * sin(ang);
+    }
 
     // 主循环运行标志
     bool running = true;
@@ -153,111 +179,146 @@ int main()
         // 到达右边界则反向并修正位置
         if (carX + carW >= width) { carX = width - carW; carDir = -1; }
 
-        // 更新小球位置：按当前速度移动
-        bx += bvx;
-        by += bvy;
-
-        // 边界处理：当小球碰到画面边缘时，随机化反弹方向和速度
-        // 左边界碰撞处理
-        if (bx - r <= 0)
+        // 更新各小球位置并处理边界与小车碰撞
+        for (int i = 0; i < NUM_BALLS; i++)
         {
-            bx = r; // 修正位置，避免出界
-            bvx = randVel(2, 5); // 水平向右随机速度
-            bvy = randVel(-5, 5); // 垂直分量随机
-            if (bvy == 0) bvy = 1; // 避免垂直速度为0
-        }
-        // 右边界碰撞处理
-        else if (bx + r >= width)
-        {
-            bx = width - r; // 修正位置
-            bvx = -randVel(2, 5); // 水平向左随机速度
-            bvy = randVel(-5, 5); // 垂直分量随机
-            if (bvy == 0) bvy = -1; // 避免垂直速度为0
-        }
+            // 更新位置
+            balls[i].x += balls[i].vx;
+            balls[i].y += balls[i].vy;
 
-        // 上边界碰撞处理
-        if (by - r <= 0)
-        {
-            by = r; // 修正位置
-            bvy = randVel(2, 5); // 垂直向下随机速度
-            bvx = randVel(-5, 5); // 水平分量随机
-            if (bvx == 0) bvx = 1; // 避免水平速度为0
-        }
-        // 下边界碰撞处理
-        else if (by + r >= height)
-        {
-            by = height - r; // 修正位置
-            bvy = -randVel(2, 5); // 垂直向上随机速度
-            bvx = randVel(-5, 5); // 水平分量随机
-            if (bvx == 0) bvx = -1; // 避免水平速度为0
-        }
-
-        // 碰撞检测：小球与小车矩形碰撞的最近点距离法
-        // 为了让碰撞箱尽量贴合小车图像，这里使用比 carW/carH 更紧凑的矩形
-        int carLeft = carX + 10;                // 小车矩形左边界（贴合车身）
-        int carTop = carY + 18;                 // 小车矩形上边界（贴合车顶）
-        int carRight = carX + 190;              // 小车矩形右边界
-        int carBottom = carY + 104;             // 小车矩形下边界（轮胎底部约为 104）
-
-        // 计算小球中心到矩形的最近点坐标 nearestX, nearestY
-        double nearestX = bx;
-        if (nearestX < carLeft) nearestX = carLeft;
-        if (nearestX > carRight) nearestX = carRight;
-        double nearestY = by;
-        if (nearestY < carTop) nearestY = carTop;
-        if (nearestY > carBottom) nearestY = carBottom;
-
-        // 最近点向量 nx, ny（从矩形到小球中心）
-        double nx = bx - nearestX;
-        double ny = by - nearestY;
-        double dist2 = nx * nx + ny * ny; // 最近点到中心的平方距离
-
-        // 如果距离小于等于半径平方，说明发生了碰撞或接触
-        if (dist2 <= (r * r))
-        {
-            // 计算碰撞法线（从矩形表面指向小球）
-            double len = sqrt(dist2);
-            double nnx, nny; // 单位法线
-            if (len == 0.0)
+            // 边界弹性碰撞（恢复系数 e=1）：反射速度并修正位置
+            if (balls[i].x - r <= 0)
             {
-                // 如果恰好重合，退回使用向上法线作为备用
-                nnx = 0.0; nny = -1.0;
+                balls[i].x = r;
+                balls[i].vx = fabs(balls[i].vx);
             }
-            else
+            else if (balls[i].x + r >= width)
             {
-                // 归一化最近点向量得到单位法线
-                nnx = nx / len;
-                nny = ny / len;
+                balls[i].x = width - r;
+                balls[i].vx = -fabs(balls[i].vx);
+            }
+            if (balls[i].y - r <= 0)
+            {
+                balls[i].y = r;
+                balls[i].vy = fabs(balls[i].vy);
+            }
+            else if (balls[i].y + r >= height)
+            {
+                balls[i].y = height - r;
+                balls[i].vy = -fabs(balls[i].vy);
             }
 
-            // 保存碰撞前小球速度大小（碰撞后保持不变）
-            double speedBefore = sqrt(bvx * bvx + bvy * bvy);
-            if (speedBefore < 0.001) speedBefore = 0.001; // 避免为零
+            // 碰撞检测：小球与小车矩形碰撞的最近点距离法
+            // 为了让碰撞箱尽量贴合小车图像，这里使用比 carW/carH 更紧凑的矩形
+            int carLeft   = carX + 10;   // 小车矩形左边界
+            int carTop    = carY + 18;   // 小车矩形上边界
+            int carRight  = carX + 190;  // 小车矩形右边界
+            int carBottom = carY + 104;  // 小车矩形下边界
 
-            // 对小球速度进行反射（只改变方向，不改变速度大小）
-            // 使用绝对速度在法线上的反射：v' = v - 2*(v·n)*n
-            double dot = bvx * nnx + bvy * nny;
-            double rvx = bvx - 2.0 * dot * nnx;
-            double rvy = bvy - 2.0 * dot * nny;
+            // 计算小球中心到矩形的最近点坐标
+            double nearestX = balls[i].x;
+            if (nearestX < carLeft)  nearestX = carLeft;
+            if (nearestX > carRight) nearestX = carRight;
+            double nearestY = balls[i].y;
+            if (nearestY < carTop)    nearestY = carTop;
+            if (nearestY > carBottom) nearestY = carBottom;
 
-            // 将反射向量归一化后按原速度大小恢复
-            double rvSpeed = sqrt(rvx * rvx + rvy * rvy);
-            if (rvSpeed < 0.0001)
+            // 最近点向量 cnx, cny（从矩形到小球中心）
+            double cnx = balls[i].x - nearestX;
+            double cny = balls[i].y - nearestY;
+            double dist2 = cnx * cnx + cny * cny; // 最近点到中心的平方距离
+
+            // 如果距离小于等于半径平方，说明发生了碰撞或接触
+            if (dist2 <= (double)(r * r))
             {
-                // 若反射后速度近似为零，则随机给一个方向
-                double ang = ((rand() % 360) * PI / 180.0);
-                bvx = cos(ang) * speedBefore;
-                bvy = sin(ang) * speedBefore;
-            }
-            else
-            {
-                bvx = rvx * (speedBefore / rvSpeed);
-                bvy = rvy * (speedBefore / rvSpeed);
-            }
+                // 计算碰撞法线（从矩形表面指向小球）
+                double len = sqrt(dist2);
+                double nnx, nny; // 单位法线
+                if (len < 0.0001)
+                {
+                    nnx = 0.0; nny = -1.0;
+                }
+                else
+                {
+                    nnx = cnx / len;
+                    nny = cny / len;
+                }
 
-            // 将小球沿法线推出表面以移除穿透（微小偏移）
-            bx = nearestX + nnx * (r + 0.5);
-            by = nearestY + nny * (r + 0.5);
+                // 保存碰撞前小球速度大小
+                double speedBefore = sqrt(balls[i].vx * balls[i].vx + balls[i].vy * balls[i].vy);
+                if (speedBefore < 0.001) speedBefore = 0.001;
+
+                // 对小球速度进行反射：v' = v - 2*(v.n)*n
+                double dot = balls[i].vx * nnx + balls[i].vy * nny;
+                double rvx = balls[i].vx - 2.0 * dot * nnx;
+                double rvy = balls[i].vy - 2.0 * dot * nny;
+
+                // 将反射向量归一化后按原速度大小恢复
+                double rvSpeed = sqrt(rvx * rvx + rvy * rvy);
+                if (rvSpeed < 0.0001)
+                {
+                    double ang = ((rand() % 360) * PI / 180.0);
+                    balls[i].vx = cos(ang) * speedBefore;
+                    balls[i].vy = sin(ang) * speedBefore;
+                }
+                else
+                {
+                    balls[i].vx = rvx * (speedBefore / rvSpeed);
+                    balls[i].vy = rvy * (speedBefore / rvSpeed);
+                }
+
+                // 将小球沿法线推出表面以移除穿透
+                balls[i].x = nearestX + nnx * (r + 0.5);
+                balls[i].y = nearestY + nny * (r + 0.5);
+            }
+        }
+
+        // 小球间完全弹性碰撞（动量守恒 + 动能守恒，恢复系数 e=1）
+        // 使用冲量法：沿碰撞法向量分解速度，交换法向分量
+        for (int i = 0; i < NUM_BALLS; i++)
+        {
+            for (int j = i + 1; j < NUM_BALLS; j++)
+            {
+                double dx = balls[j].x - balls[i].x;
+                double dy = balls[j].y - balls[i].y;
+                double dist2 = dx * dx + dy * dy;
+                double minDist = 2.0 * r; // 两球半径之和
+
+                if (dist2 >= minDist * minDist || dist2 < 1e-12)
+                    continue; // 未接触或重合则跳过
+
+                double dist = sqrt(dist2);
+                // 单位法向量（从球 i 指向球 j）
+                double nx = dx / dist;
+                double ny = dy / dist;
+
+                // 相对速度沿法向分量（正值表示两球相向靠近）
+                double rel = (balls[i].vx - balls[j].vx) * nx
+                           + (balls[i].vy - balls[j].vy) * ny;
+
+                if (rel > 0.0) // 仅处理靠近情形，避免分离时重复碰撞
+                {
+                    double mi = balls[i].m;
+                    double mj = balls[j].m;
+                    // 完全弹性冲量大小（e=1）： imp = 2*rel / (1/mi + 1/mj)
+                    double imp = 2.0 * rel / (1.0 / mi + 1.0 / mj);
+                    balls[i].vx -= (imp / mi) * nx;
+                    balls[i].vy -= (imp / mi) * ny;
+                    balls[j].vx += (imp / mj) * nx;
+                    balls[j].vy += (imp / mj) * ny;
+                }
+
+                // 位置修正：将重叠的两球均匀分开，防止抖动
+                double overlap = minDist - dist;
+                if (overlap > 0.0)
+                {
+                    double corr = overlap * 0.5;
+                    balls[i].x -= corr * nx;
+                    balls[i].y -= corr * ny;
+                    balls[j].x += corr * nx;
+                    balls[j].y += corr * ny;
+                }
+            }
         }
 
         // 绘制帧：先清屏
@@ -270,10 +331,13 @@ int main()
         // 使用 putimage 绘制小车图像到当前 carX, carY（保证车底贴地）
         putimage(carX, carY, &carImg);
 
-        // 绘制小球（填充颜色）
-        setfillcolor(LIGHTRED);
-        setcolor(LIGHTRED);
-        fillcircle((int)bx, (int)by, r);
+        // 绘制所有小球
+        for (int i = 0; i < NUM_BALLS; i++)
+        {
+            setfillcolor(balls[i].color);
+            setcolor(balls[i].color);
+            fillcircle((int)balls[i].x, (int)balls[i].y, r);
+        }
 
         // 刷新批量绘制的内容到屏幕
         FlushBatchDraw();
